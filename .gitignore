@@ -1,0 +1,6 @@
+*.DS_Store
+.Rprofile
+.Rproj.user/
+data/
+
+distributional-farm-size-analysis.Rproj
