@@ -1,6 +1,6 @@
 #' Preparing and Mergining Datasets
 #' 
-#' This script merges household survey (RHoMIS)
+#' This script merges household survey (LSMS)
 #' with datasets from Google Earth Engine (GEE)
 #' and the GAEZ v4 Data Portal 
 #' 
@@ -46,6 +46,7 @@ library(geojsonsf)
 library(corrplot)
 library(raster)
 library(leaflet)
+
 library(mapview)
 
 # Graph Plotting
@@ -75,10 +76,10 @@ library(RColorBrewer)
 #'
 #' @examples
 read_and_tranform_ee_df <- function(file_name,
-                                    basepath = 'data/earth-engine/level-2-variables/',
+                                    basepath = 'data/earth-engine/',
                                     categorical=FALSE,
                                     band_name=NULL){
- 
+  
   df <- readr::read_csv(paste0(basepath,file_name))
   
   # Removing unnecessary column names
@@ -140,8 +141,8 @@ convert_aez_classes <- function(aez_df,
   aez_conversion_tbl$band <- as.integer(aez_conversion_tbl$band)
   aez_df[[aez_colname]] <- as.integer(aez_df[[aez_colname]])
   
-
-
+  
+  
   result <- aez_df %>% merge(aez_conversion_tbl, 
                              by.x=aez_colname, 
                              by.y="band",
@@ -169,6 +170,15 @@ convert_aez_classes <- function(aez_df,
   return(result)
 }
 
+read_gee_point_df <- function(lsms_df ,path, var_name){
+  gee_df <- readr::read_csv(path)
+  lsms_df <- lsms_df %>% 
+    merge(gee_df, by.x = "index", by.y = "index", all.x = T)
+  lsms_df <- lsms_df[colnames(lsms_df) %in% c("system:index",".geo","farm_size_ha.y")==F]
+  colnames(lsms_df) <- gsub("farm_size_ha.x","farm_size_ha",colnames(lsms_df))
+  colnames(lsms_df) <- gsub("first",var_name,colnames(lsms_df))
+  return(lsms_df)
+}
 
 
 # -------------------------------------------------------------------------------------------------------------
@@ -176,36 +186,31 @@ convert_aez_classes <- function(aez_df,
 # -------------------------------------------------------------------------------------------------------------
 
 # RHoMIS Data
-rhomis_data <- readr::read_csv("./data/rhomis-data/processed_data/processed_data.csv")
-rhomis_data <- rhomis_data[!is.na(rhomis_data$gps_lat) & !is.na(rhomis_data$gps_lon),]
-rhomis_data <- st_as_sf(rhomis_data, coords = c("gps_lon", "gps_lat"), 
-                        crs = 4326, agr = "constant", remove = F)
+# rhomis_data <- readr::read_csv("./data/rhomis-data/processed_data/processed_data.csv")
+# rhomis_data <- rhomis_data[!is.na(rhomis_data$gps_lat) & !is.na(rhomis_data$gps_lon),]
+# rhomis_data <- st_as_sf(rhomis_data, coords = c("gps_lon", "gps_lat"), 
+#                         crs = 4326, agr = "constant", remove = F)
 
 # LSMS Data
 
 lsms_data <- readr::read_csv("./data/lsms/farm-size-all-points.csv")
-
+lsms_data$index <- c(1:nrow(lsms_data))
 
 # Point Stats -------------------------------------------------------------
 
-read_gee_point_df <- function(lsms_df ,path, var_name){
-  gee_df <- readr::read_csv(path)
-  lsms_df <- lsms_df %>% 
-    merge(gee_df, by.x = "index", by.y = "index", all.x = T)
-  lsms_df <- lsms_df[colnames(lsms_df) %in% c("system:index",".geo","farm_size_ha.y ")==F]
-  colnames(lsms_df) <- gsub("farm_size_ha.x","farm_size_ha",colnames(lsms_df))
-  colnames(lsms_df) <- gsub("first",var_name,colnames(lsms_df))
-  return(lsms_df)
-}
 
-travel_time <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time")
-travel_time <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time")
-
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/land-cover-lsms.csv","land_cover")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/population-density-lsms.csv","population_density")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/topographic-diversity-lsms.csv","topographic_diversity")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/night-time-light-lsms.csv","night_lights")
+lsms_data <- lsms_data[complete.cases(lsms_data),]
 
 # Areal Stats -------------------------------------------------------------
 # Earth Engine Data
 # FAO administrative data
-fao_level_2 <- geojson_sf('data/earth-engine/level-2-variables/fao-gaul-level-2.geojson')
+
+fao_level_2 <- geojson_sf('data/earth-engine/fao-gaul-level-2.geojson')
 fao_level_2 <- sf::st_as_sf(x = fao_level_2, wkt = "geometry")
 fao_level_2 <-st_set_crs(fao_level_2,'EPSG:4326')
 
@@ -215,8 +220,8 @@ elevation_data <- read_and_tranform_ee_df("digital-elevation-zone-2.csv")
 
 # Land Cover Categories (coverage)
 land_cover_cat <- read_and_tranform_ee_df( "land-cover-categories-level-2.csv",
-                                    categorical=T,
-                                    band_name="land_cat")
+                                           categorical=T,
+                                           band_name="land_cat")
 
 # NDVI 
 ndvi_data <- read_and_tranform_ee_df("ndvi-zone-2.csv")
@@ -234,7 +239,7 @@ topographic_diversity_data <- read_and_tranform_ee_df("topographic-diversity-zon
 travel_time_health_data <- read_and_tranform_ee_df("travel-time-to-health-zone-2.csv")
 
 # Agro-Eco Zone Data (GAEZ)
-aez_33_classes <- raster("./data/aez/gaez_v4_57_class/33_classes.tif")
+aez_33_classes <- raster("./data/gaez/33_classes.tif")
 rasterToPoints(aez_33_classes)
 
 xml_33_list <-  xmlParse('./data/aez/LR/aez/aez_v9v2red_5m_ENSEMBLE_rcp2p6_2020s.tif.aux.xml')
@@ -270,20 +275,16 @@ adjusted_length_growing_period <- projectRaster(adjusted_length_growing_period,a
 # r_stack <- raster::stack(aez_33_classes,aez_57_classes,adjusted_length_growing_period)
 r_stack <- raster::stack(aez_33_classes,adjusted_length_growing_period)
 
-points <- as(rhomis_data$geometry, Class="Spatial")
-
-rasValue=raster::extract(r_stack, points) %>% tibble::as_tibble()
-
-
+rasValue=raster::extract(r_stack, lsms_data[c("longitude","latitude")]) %>% tibble::as_tibble()
 
 colnames(rasValue) <- gsub("X33_classes", "AEZ_Classes_33", colnames(rasValue))
 
 rasValue$AEZ_Classes_33 <- as.integer(rasValue$AEZ_Classes_33)
 
 rasValue <- convert_aez_classes(rasValue,
-                                      "AEZ_Classes_33",
-                                      aez_33_class_conversions
-                                      )
+                                "AEZ_Classes_33",
+                                aez_33_class_conversions
+)
 
 # rasValue <- convert_aez_classes(rasValue,
 #                                       "AEZ_Classes_57",
@@ -291,17 +292,7 @@ rasValue <- convert_aez_classes(rasValue,
 # )
 # colSums(AEZ_classes_57[grep("AEZ_Classes_57_", colnames(AEZ_classes_57))], na.rm = T)
 
-
-
-
-
-
 # dummie_aez <- fastDummies::dummy_cols(rasValue,select_columns = c("AEZ_Classes_33","AEZ_Classes_57"))
-
-# World Shapefile (Useful for plotting)
-world_all <- readr::read_csv("./data/prepared-data/world-shapefile.csv")
-world_all <- sf::st_as_sf(x = world_all, wkt = "geometry")
-world_all <-st_set_crs(world_all,'EPSG:4326')
 
 
 #### Joining data
@@ -360,28 +351,32 @@ fao_level_2 <-  fao_level_2 %>% merge(travel_time_health_data,
 
 
 
+lsms_geo  <- st_as_sf(lsms_data, coords = c("longitude", "latitude"), 
+         crs = 4326, agr = "constant", remove = F)
 
-joined_df <- st_join(x=rhomis_data, 
+
+joined_df <- st_join(x=lsms_geo, 
                      y=fao_level_2,
                      left=T)
 
-joined_df <- joined_df %>% dplyr::bind_cols(rasValue)
+joined_df <- joined_df %>%  merge(rasValue, by="index")#dplyr::bind_cols(rasValue)
 joined_df <- joined_df[!is.na(joined_df$ADM0_CODE),]
+# joined_df <- joined_df[,colnames(joined_df) %in% "index...95"==F]
 
 
 
+columns_to_merge <- c("index",colnames(fao_level_2),colnames(rasValue), "longitude", "latitude", "geometry")
+# ind_data <- readr::read_csv("./data/rhomis-data/indicator_data/indicator_data.csv")
+# ind_data <- ind_data[ind_data$id_unique %in% joined_df$id_unique,]
 
-columns_to_merge <- c("id_unique",colnames(fao_level_2),colnames(rasValue), "gps_lon", "gps_lat", "geometry")
-ind_data <- readr::read_csv("./data/rhomis-data/indicator_data/indicator_data.csv")
-ind_data <- ind_data[ind_data$id_unique %in% joined_df$id_unique,]
-
-ind_data <- ind_data %>% merge(joined_df[columns_to_merge], by="id_unique")
-
+lsms_data <- lsms_data %>% merge(joined_df[columns_to_merge], by="index")
 
 
 
-readr::write_csv(joined_df, "data/prepared-data/rhomis-ee-gaez.csv")
-readr::write_csv(ind_data, "data/prepared-data/rhomis-indicator-ee-gaez.csv")
+readr::write_csv(joined_df, "data/prepared-data/lsms-ee-gaez.csv")
+
+# readr::write_csv(joined_df, "data/prepared-data/rhomis-ee-gaez.csv")
+# readr::write_csv(ind_data, "data/prepared-data/rhomis-indicator-ee-gaez.csv")
 
 
 

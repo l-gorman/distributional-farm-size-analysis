@@ -1,3 +1,13 @@
+#' This script is used
+#' to extract point values from LSMS
+#' or RHoMIS Surveys.
+#' 
+#' The resulting table 
+#' is then uploaded to google earth
+#' engine as a "feature collection"
+#' 
+#' See here:
+#' https://developers.google.com/earth-engine/guides/table_upload
 
 library(readr)
 library(tibble)
