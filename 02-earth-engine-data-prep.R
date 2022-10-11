@@ -230,10 +230,25 @@ categorical_pixel_counts <- function(polygon_feature,
     x <- raster::crop(categorical_raster, polygon_feature[polygon_index,])
     x <- raster::mask(categorical_raster, polygon_feature[polygon_index,])
     
+    
+    
     sub_result <- unname(freq(x, useNA="no"))[[1]] %>% tibble::as_tibble()
+    
     
     sub_result["proportion_coverage"] <- sub_result["count"]/sum(sub_result["count"],na.rm = T)
     sub_result$polygon_index <- polygon_index
+    
+    if (nrow(sub_result)==0){
+      sub_result <- tibble::as_tibble(
+        list(
+          value="no_valid_pixels",
+          proportion_coverage=0,
+          count=0,
+          polygon_index=polygon_index
+          
+        )
+      )
+    }
     if(!is.null(category_prefix)){
       sub_result$value <- paste0(category_prefix,"_",sub_result$value)
     }
