@@ -25,6 +25,8 @@
 #' repository
 #' 
 #' 
+#' Instructions on Parralel: https://www.blasbenito.com/post/02_parallelizing_loops_with_r/
+#' 
 # -------------------------------------------------------------------------------------------------------------
 # Loading Libraries -------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
@@ -55,6 +57,24 @@ library(ggridges)
 library(ggExtra)
 library(RColorBrewer)
 
+library(parallel)
+library(foreach)
+library(doParallel)
+
+
+# Initialising Parallel ---------------------------------------------------
+
+n.cores <- parallel::detectCores()-1
+
+my.cluster <- parallel::makeCluster(
+  n.cores)
+doParallel::registerDoParallel(cl = my.cluster)
+
+# Check if registered
+#foreach::getDoParRegistered()
+
+#how many workers are available? (optional)
+#foreach::getDoParWorkers()
 
 # -------------------------------------------------------------------------------------------------------------
 # Defining Functions -------------------------------------------------------------------------------------------
@@ -180,7 +200,105 @@ read_gee_point_df <- function(lsms_df ,path, var_name){
   return(lsms_df)
 }
 
+#' Categorical Pixel Counts
+#' 
+#' Extract pixel coverage per 
+#' polygon for different categories
+#' 
+#' See here for guidance: https://stackoverflow.com/questions/61659966/can-i-extract-raster-pixel-frequencies-polygon-by-polygon-one-at-a-time-and-sa
+#'
+#' @param polygon_feature The feature containing multiple polygons
+#' @param categorical_raster The raster containing categorical outputs
+#' @param category_prefix A prefix that you would like to give to column names in your final output
+#' @param number_of_features N number of first features (used for testing)
+categorical_pixel_counts <- function(polygon_feature, 
+                                     categorical_raster, 
+                                     category_prefix=NULL,
+                                     number_of_features=NULL
+                                     
+){
+  
+  if(is.null(number_of_features)){
+    number_of_features <- length(polygon_feature)
+  }
+  
+  result <- foreach(
+    polygon_index = 1:number_of_features, 
+    .combine = 'rbind',
+    .packages=c('tibble', 'magrittr', 'raster')
+  ) %dopar% {
+    x <- raster::crop(categorical_raster, polygon_feature[polygon_index,])
+    x <- raster::mask(categorical_raster, polygon_feature[polygon_index,])
+    
+    sub_result <- unname(freq(x, useNA="no"))[[1]] %>% tibble::as_tibble()
+    
+    sub_result["proportion_coverage"] <- sub_result["count"]/sum(sub_result["count"],na.rm = T)
+    sub_result$polygon_index <- polygon_index
+    if(!is.null(category_prefix)){
+      sub_result$value <- paste0(category_prefix,"_",sub_result$value)
+    }
+    sub_result
+  }
+  
+  result <- tidyr::pivot_wider(result, id_cols = "polygon_index",names_from = "value",values_from = "proportion_coverage",values_fill = 0)
+  result['polygon_index'] <- NULL
+  
+  polygon_to_return <- polygon_feature[1:number_of_features,]
+  polygon_to_return<- cbind(polygon_to_return,result)
+  
+  
+  return(polygon_feature)
+}
 
+#' Mean Value Per Polygon
+#' 
+#' Function for caluclating the mean
+#' value from a raster, for a particular
+#' polygon
+#'
+#' @param polygon_feature 
+#' @param continuous_raster 
+#' @param new_name 
+#' @param number_of_features 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+continuous_pixel_stat <- function(polygon_feature,
+                                  continuous_raster, 
+                                  new_name,
+                                  number_of_features=NULL){
+  continuous_raster <- raster::stack(adjusted_length_growing_period)
+  if(is.null(number_of_features)){
+    number_of_features <- length(polygon_feature)
+  }
+  result <- foreach(
+    polygon_index = 1:number_of_features, 
+    .combine = 'rbind',
+    .packages=c('tibble', 'magrittr', 'raster')
+  ) %dopar% {
+    x <- raster::crop(continuous_raster, polygon_feature[polygon_index,])
+    x <- raster::mask(continuous_raster, polygon_feature[polygon_index,])
+    sub_result <- raster::extract(continuous_raster,polygon_feature[polygon_index,], fun=function(i,...){
+      mean(i, na.rm=T)
+    })
+    
+    as.numeric(sub_result)
+  }
+  
+  result <- tibble::as_tibble(list(
+    new_column =as.numeric(result)
+  ))
+  colnames(result) <- new_name
+  
+  polygon_to_return <- polygon_feature[1:number_of_features,]
+  
+  
+  polygon_to_return <- cbind(polygon_to_return,result)
+  return(polygon_to_return)
+  
+}
 # -------------------------------------------------------------------------------------------------------------
 # Reading in Data -------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
@@ -199,11 +317,11 @@ lsms_data$index <- c(1:nrow(lsms_data))
 # Point Stats -------------------------------------------------------------
 
 
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/land-cover-lsms.csv","land_cover")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/population-density-lsms.csv","population_density")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/topographic-diversity-lsms.csv","topographic_diversity")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/night-time-light-lsms.csv","night_lights")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time_point")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/land-cover-lsms.csv","land_cover_point")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/population-density-lsms.csv","population_density_point")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/topographic-diversity-lsms.csv","topographic_diversity_point")
+lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/night-time-light-lsms.csv","night_lights_point")
 lsms_data <- lsms_data[complete.cases(lsms_data),]
 
 # Areal Stats -------------------------------------------------------------
@@ -213,6 +331,10 @@ lsms_data <- lsms_data[complete.cases(lsms_data),]
 fao_level_2 <- geojson_sf('data/earth-engine/fao-gaul-level-2.geojson')
 fao_level_2 <- sf::st_as_sf(x = fao_level_2, wkt = "geometry")
 fao_level_2 <-st_set_crs(fao_level_2,'EPSG:4326')
+types <- vapply(sf::st_geometry(fao_level_2), function(x) {
+  class(x)[2]
+}, "")
+fao_level_2 <- fao_level_2[types!="GEOMETRYCOLLECTION",]
 
 
 # Elevation 
@@ -237,6 +359,12 @@ topographic_diversity_data <- read_and_tranform_ee_df("topographic-diversity-zon
 
 # Hospital Travel Time
 travel_time_health_data <- read_and_tranform_ee_df("travel-time-to-health-zone-2.csv")
+
+
+
+# GAEZ data ---------------------------------------------------------------
+
+
 
 # Agro-Eco Zone Data (GAEZ)
 aez_33_classes <- raster("./data/gaez/33_classes.tif")
@@ -272,27 +400,40 @@ aez_33_class_conversions <- lapply(c(1:length(xml_33_list)), function(index){
 adjusted_length_growing_period  <- raster("./data/aez/gaez_v4_57_class/adjusted_length_growing_period.tif")
 adjusted_length_growing_period <- projectRaster(adjusted_length_growing_period,aez_33_classes)
 
-# r_stack <- raster::stack(aez_33_classes,aez_57_classes,adjusted_length_growing_period)
+# Point estimates
 r_stack <- raster::stack(aez_33_classes,adjusted_length_growing_period)
-
 rasValue=raster::extract(r_stack, lsms_data[c("longitude","latitude")]) %>% tibble::as_tibble()
-
 colnames(rasValue) <- gsub("X33_classes", "AEZ_Classes_33", colnames(rasValue))
-
 rasValue$AEZ_Classes_33 <- as.integer(rasValue$AEZ_Classes_33)
-
 rasValue <- convert_aez_classes(rasValue,
                                 "AEZ_Classes_33",
-                                aez_33_class_conversions
-)
+                                aez_33_class_conversions)
 
-# rasValue <- convert_aez_classes(rasValue,
-#                                       "AEZ_Classes_57",
-#                                       aez_57_class_conversions
-# )
-# colSums(AEZ_classes_57[grep("AEZ_Classes_57_", colnames(AEZ_classes_57))], na.rm = T)
+# Zonal Estimates
 
-# dummie_aez <- fastDummies::dummy_cols(rasValue,select_columns = c("AEZ_Classes_33","AEZ_Classes_57"))
+spatial_fao <- as(fao_level_2, "Spatial")
+spatial_fao = spTransform(spatial_fao,crs(aez_33_classes))
+
+raster_to_merge <- raster::stack(aez_33_classes)
+
+
+
+
+
+
+
+
+result <- categorical_pixel_counts(polygon_feature = spatial_fao,
+                         categorical_raster = raster::stack(aez_33_classes),
+                         category_prefix = "level_2_aez_33_classes"
+                        )
+
+result <- continuous_pixel_stat(polygon_feature =result,
+                      continuous_raster = raster::stack(adjusted_length_growing_period),
+                      new_name = "level_2_mean_adjusted_length"
+                      )
+
+fao_level_2 <- st_as_sf(result)
 
 
 #### Joining data
@@ -352,7 +493,7 @@ fao_level_2 <-  fao_level_2 %>% merge(travel_time_health_data,
 
 
 lsms_geo  <- st_as_sf(lsms_data, coords = c("longitude", "latitude"), 
-         crs = 4326, agr = "constant", remove = F)
+                      crs = 4326, agr = "constant", remove = F)
 
 
 joined_df <- st_join(x=lsms_geo, 

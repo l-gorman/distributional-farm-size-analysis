@@ -56,6 +56,13 @@ fao_level_2 <- tibble::as_tibble(fao_level_2)
 
 land_categories <-  readr::read_csv("./data/prepared-data/land_cover_classes.csv")
 
+farm_size_data <- farm_size_data %>% merge(land_categories, 
+                                            by.x="land_cover", 
+                                            by.y="Value",
+                                            all.x=T,
+                                            all.y=F)
+farm_size_data <- farm_size_data %>% dplyr::rename()
+
 farm_size_data <- farm_size_data[!is.na(farm_size_data$farm_size_ha),]
 farm_size_data <- farm_size_data[!is.na(farm_size_data$AEZ_Classes_33),]
 
@@ -137,26 +144,26 @@ x <- c("healthcare_traveltime",
        new_land_cat_columns
 )
 
-aez_33 <- grep("AEZ_Classes_33_", colnames(indicator_data), value=T)
+aez_33 <- grep("AEZ_Classes_33_", colnames(farm_size_data), value=T)
 
 
 
 
-y <-c("land_cultivated_ha")
+y <-c("farm_size_ha")
 
 
 # Looking at subnational indicators vas land cultivated
-cor(indicator_data[c(x,aez_33,y)])
+cor(farm_size_data[c(x,aez_33,y)])
 
-corr_matrix <- round(cor(indicator_data[c(x,aez_33,y)]),2) %>% tibble::as_tibble()
+corr_matrix <- round(cor(farm_size_data[c(x,aez_33,y)]),2) %>% tibble::as_tibble()
 corr_matrix$var <- colnames(corr_matrix)
 corr_matrix <- corr_matrix %>% pivot_longer(cols = colnames(corr_matrix)[colnames(corr_matrix)!="var"])
 
 colnames(corr_matrix) <- c("var1", "var2", "value")
 
 
-land_cult_corr <- corr_matrix[corr_matrix$var1=="land_cultivated_ha", ]
-land_cult_corr <- land_cult_corr[land_cult_corr$var2!="land_cultivated_ha",]
+land_cult_corr <- corr_matrix[corr_matrix$var1=="farm_size_ha", ]
+land_cult_corr <- land_cult_corr[land_cult_corr$var2!="farm_size_ha",]
 
 land_cult_corr$var2 <- gsub("AEZ_Classes_33_", "",land_cult_corr$var2)
 
@@ -225,6 +232,14 @@ ggplot(data = land_cult_corr, aes(y=var2, x=value)) +
   theme(text = element_text(size = 16),
         axis.text.y = element_text(colour = land_cult_corr$color)
   )           
+
+
+land_cult_corr <- land_cult_corr[order(sqrt(land_cult_corr$value^2),decreasing = T),]
+
+magni
+# Initial Modelling -------------------------------------------------------
+
+
 
 
 

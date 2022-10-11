@@ -144,18 +144,6 @@
         "Matrix"
       ]
     },
-    "PerformanceAnalytics": {
-      "Package": "PerformanceAnalytics",
-      "Version": "2.0.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5ff15925d7e369565203053934e8d9d9",
-      "Requirements": [
-        "quadprog",
-        "xts",
-        "zoo"
-      ]
-    },
     "R6": {
       "Package": "R6",
       "Version": "2.5.1",
@@ -197,14 +185,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f3e94e34ff656a7c8336ce01207bc2b8",
-      "Requirements": []
-    },
-    "SparseGrid": {
-      "Package": "SparseGrid",
-      "Version": "0.8.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "4b12daa3195694b52af7a120cbce7331",
       "Requirements": []
     },
     "SparseM": {
@@ -689,6 +669,17 @@
         "vctrs"
       ]
     },
+    "doParallel": {
+      "Package": "doParallel",
+      "Version": "1.0.17",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "451e5edf411987991ab6a5410c45011f",
+      "Requirements": [
+        "foreach",
+        "iterators"
+      ]
+    },
     "dplyr": {
       "Package": "dplyr",
       "Version": "1.0.9",
@@ -847,6 +838,17 @@
         "rlang",
         "tibble",
         "withr"
+      ]
+    },
+    "foreach": {
+      "Package": "foreach",
+      "Version": "1.5.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "618609b42c9406731ead03adf5379850",
+      "Requirements": [
+        "codetools",
+        "iterators"
       ]
     },
     "foreign": {
@@ -1184,6 +1186,14 @@
       "Hash": "7ab57a6de7f48a8dc84910d1eca42883",
       "Requirements": []
     },
+    "iterators": {
+      "Package": "iterators",
+      "Version": "1.0.14",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "8954069286b4b2b0d023d1b288dce978",
+      "Requirements": []
+    },
     "jquerylib": {
       "Package": "jquerylib",
       "Version": "0.1.4",
@@ -1381,17 +1391,6 @@
         "matrixStats"
       ]
     },
-    "lqmm": {
-      "Package": "lqmm",
-      "Version": "1.5.8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "f72ca98505ca954f96ca18cbcd8f3fef",
-      "Requirements": [
-        "SparseGrid",
-        "nlme"
-      ]
-    },
     "lwgeom": {
       "Package": "lwgeom",
       "Version": "0.2-8",
@@ -1506,14 +1505,6 @@
       "Requirements": [
         "Rcpp"
       ]
-    },
-    "mnormt": {
-      "Package": "mnormt",
-      "Version": "2.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "dc13319a6a370e3ce538a1c17f58ce57",
-      "Requirements": []
     },
     "moments": {
       "Package": "moments",
@@ -1794,14 +1785,6 @@
         "rlang"
       ]
     },
-    "quadprog": {
-      "Package": "quadprog",
-      "Version": "1.5-8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5f919ae5e7f83a6f91dcf2288943370d",
-      "Requirements": []
-    },
     "quantreg": {
       "Package": "quantreg",
       "Version": "5.93",
@@ -1904,16 +1887,6 @@
         "stringr"
       ]
     },
-    "revealjs": {
-      "Package": "revealjs",
-      "Version": "0.9",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "08e30caa337e6d335d83df1a05d5b9f3",
-      "Requirements": [
-        "rmarkdown"
-      ]
-    },
     "rlang": {
       "Package": "rlang",
       "Version": "1.0.2",
@@ -1921,25 +1894,6 @@
       "Repository": "CRAN",
       "Hash": "04884d9a75d778aca22c7154b8333ec9",
       "Requirements": []
-    },
-    "rmarkdown": {
-      "Package": "rmarkdown",
-      "Version": "2.14",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "31b60a882fabfabf6785b8599ffeb8ba",
-      "Requirements": [
-        "bslib",
-        "evaluate",
-        "htmltools",
-        "jquerylib",
-        "jsonlite",
-        "knitr",
-        "stringr",
-        "tinytex",
-        "xfun",
-        "yaml"
-      ]
     },
     "rprojroot": {
       "Package": "rprojroot",
@@ -2186,18 +2140,6 @@
         "shiny"
       ]
     },
-    "sn": {
-      "Package": "sn",
-      "Version": "2.0.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c12f6c9a650876e2a543e410a65675c4",
-      "Requirements": [
-        "mnormt",
-        "numDeriv",
-        "quantreg"
-      ]
-    },
     "sourcetools": {
       "Package": "sourcetools",
       "Version": "0.1.7",
@@ -2390,16 +2332,6 @@
         "purrr",
         "rlang",
         "vctrs"
-      ]
-    },
-    "tinytex": {
-      "Package": "tinytex",
-      "Version": "0.38",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "759d047596ac173433985deddf313450",
-      "Requirements": [
-        "xfun"
       ]
     },
     "tzdb": {
