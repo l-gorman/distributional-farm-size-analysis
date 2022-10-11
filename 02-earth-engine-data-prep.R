@@ -415,6 +415,12 @@ aez_33_class_conversions <- lapply(c(1:length(xml_33_list)), function(index){
 adjusted_length_growing_period  <- raster("./data/aez/gaez_v4_57_class/adjusted_length_growing_period.tif")
 adjusted_length_growing_period <- projectRaster(adjusted_length_growing_period,aez_33_classes)
 
+
+dixons_farm_categories <- sf::read_sf("./data/dixons-farming-systems/FS/fs_lev_2.shp")
+plot(dixons_farm_categories)
+
+
+
 # Point estimates
 r_stack <- raster::stack(aez_33_classes,adjusted_length_growing_period)
 rasValue=raster::extract(r_stack, lsms_data[c("longitude","latitude")]) %>% tibble::as_tibble()
@@ -514,6 +520,11 @@ lsms_geo  <- st_as_sf(lsms_data, coords = c("longitude", "latitude"),
 joined_df <- st_join(x=lsms_geo, 
                      y=fao_level_2,
                      left=T)
+
+sf_use_s2(F)
+st_join(x=lsms_geo, 
+        y=dixons_farm_categories,
+        left=T)
 
 joined_df <- joined_df %>%  merge(rasValue, by="index")#dplyr::bind_cols(rasValue)
 joined_df <- joined_df[!is.na(joined_df$ADM0_CODE),]
