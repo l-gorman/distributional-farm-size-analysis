@@ -42,15 +42,14 @@ library(magrittr)
 
 # Spatial Packages
 library(sf)
-library(sp)
 library(stars)
+library(terra)
+library(raster)
+
+library(sp)
 library(geojsonsf)
 library(corrplot)
-library(raster)
 library(leaflet)
-
-library(mapview)
-
 # Graph Plotting
 library(ggplot2)
 library(ggridges)
@@ -389,7 +388,7 @@ travel_time_health_data <- read_and_tranform_ee_df(basepath = paste0(opt$directo
 # GAEZ data ---------------------------------------------------------------
 
 # Agro-Eco Zone Data (GAEZ)
-aez_33_classes <- raster(paste0(opt$directory,"data/gaez/33_classes.tif"))
+aez_33_classes <- raster::raster(x = paste0(opt$directory,"data/gaez/33_classes.tif"))
 rasterToPoints(aez_33_classes)
 
 xml_33_list <-  xmlParse(paste0(opt$directory,'data/aez/LR/aez/aez_v9v2red_5m_ENSEMBLE_rcp2p6_2020s.tif.aux.xml'))
@@ -443,12 +442,12 @@ spatial_fao <- spTransform(spatial_fao,crs(aez_33_classes))
 
 result <- categorical_pixel_counts(polygon_feature = spatial_fao,
                          categorical_raster = raster::stack(aez_33_classes),
-                         category_prefix = "level_2_aez_33_classes",
+                         category_prefix = "level_2_aez_33_classes",10
                         )
 
 result <- continuous_pixel_stat(polygon_feature =result,
                       continuous_raster = raster::stack(adjusted_length_growing_period),
-                      new_name = "level_2_mean_length_growing_season"
+                      new_name = "level_2_mean_length_growing_season",10
                       )
 
 fao_level_2 <- st_as_sf(result)

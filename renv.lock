@@ -1762,7 +1762,7 @@
       "Version": "3.5-29",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "8d673c59e4140ee8631e61216dbe5887",
+      "Hash": "d550f9d6dbb4dce7cbd146b09d663343",
       "Requirements": [
         "Rcpp",
         "sp",
@@ -1982,10 +1982,10 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-7",
+      "Version": "1.0-8",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d237b77320537f7793c7a4f83267cf50",
+      "Hash": "153da622b27630793858f24436bc0871",
       "Requirements": [
         "DBI",
         "Rcpp",
@@ -2102,10 +2102,10 @@
     },
     "stars": {
       "Package": "stars",
-      "Version": "0.5-5",
+      "Version": "0.5-6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b116254371e0d6681ab063bae82f0ece",
+      "Hash": "76798fa5bef65f2fd55db9c6efb40e96",
       "Requirements": [
         "abind",
         "classInt",
