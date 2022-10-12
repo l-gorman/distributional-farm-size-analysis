@@ -26,7 +26,8 @@ echo "More details on submitting jobs here https://www.acrc.bris.ac.uk/protected
 module add languages/r/4.1.0
 module add tools/cmake/3.20.0 #Needed for R-package nloptr
 module add tools/gdal/3.4.0 # Needed for spatial analysis
-
+module add GDAL/2.0.2-foss-2016a
+module add PROJ/4.9.2-foss-2016a
 # d=$(date +%Y-%m-%d)
 
 # export OMP_NUM_THREADS=4
