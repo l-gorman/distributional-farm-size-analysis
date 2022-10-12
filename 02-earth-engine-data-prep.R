@@ -518,10 +518,10 @@ joined_df <- st_join(x=lsms_geo,
                      y=fao_level_2,
                      left=T)
 
-sf_use_s2(F)
-st_join(x=lsms_geo, 
-        y=dixons_farm_categories,
-        left=T)
+# sf_use_s2(F)
+# st_join(x=lsms_geo, 
+#         y=dixons_farm_categories,
+#         left=T)
 
 joined_df <- joined_df %>%  merge(rasValue, by="index")#dplyr::bind_cols(rasValue)
 joined_df <- joined_df[!is.na(joined_df$ADM0_CODE),]
