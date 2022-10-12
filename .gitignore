@@ -3,4 +3,7 @@
 .Rproj.user/
 data/
 
+copy-to-bc4.sh
+copy-from-bc4.sh
+
 distributional-farm-size-analysis.Rproj

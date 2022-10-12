@@ -217,6 +217,7 @@ categorical_pixel_counts <- function(polygon_feature,
                                      number_of_features=NULL
                                      
 ){
+  polygon_feature$polygon_index <- c(1:length(polygon_feature))
   
   if(is.null(number_of_features)){
     number_of_features <- length(polygon_feature)
@@ -256,13 +257,11 @@ categorical_pixel_counts <- function(polygon_feature,
   }
   
   result <- tidyr::pivot_wider(result, id_cols = "polygon_index",names_from = "value",values_from = "proportion_coverage",values_fill = 0)
-  result['polygon_index'] <- NULL
+
+  polygon_to_return <-  polygon_feature[1:number_of_features,] %>% merge(result, by="polygon_index")
+  polygon_to_return$polygon_index<-NULL
   
-  polygon_to_return <- polygon_feature[1:number_of_features,]
-  polygon_to_return<- cbind(polygon_to_return,result)
-  
-  
-  return(polygon_feature)
+  return(polygon_to_return)
 }
 
 #' Mean Value Per Polygon
@@ -284,7 +283,8 @@ continuous_pixel_stat <- function(polygon_feature,
                                   continuous_raster, 
                                   new_name,
                                   number_of_features=NULL){
-  continuous_raster <- raster::stack(adjusted_length_growing_period)
+  polygon_feature$polygon_index <- c(1:length(polygon_feature))
+  
   if(is.null(number_of_features)){
     number_of_features <- length(polygon_feature)
   }
@@ -303,14 +303,13 @@ continuous_pixel_stat <- function(polygon_feature,
   }
   
   result <- tibble::as_tibble(list(
+    polygon_index=c(1:length(result)),
     new_column =as.numeric(result)
   ))
-  colnames(result) <- new_name
+  colnames(result) <- c("polygon_index",new_name)
   
-  polygon_to_return <- polygon_feature[1:number_of_features,]
+  polygon_to_return <-  polygon_feature[1:number_of_features,] %>% merge(result, by="polygon_index")
   
-  
-  polygon_to_return <- cbind(polygon_to_return,result)
   return(polygon_to_return)
   
 }
@@ -379,8 +378,6 @@ travel_time_health_data <- read_and_tranform_ee_df("travel-time-to-health-zone-2
 
 # GAEZ data ---------------------------------------------------------------
 
-
-
 # Agro-Eco Zone Data (GAEZ)
 aez_33_classes <- raster("./data/gaez/33_classes.tif")
 rasterToPoints(aez_33_classes)
@@ -411,13 +408,12 @@ aez_33_class_conversions <- lapply(c(1:length(xml_33_list)), function(index){
 })  %>% dplyr::bind_rows()
 
 
-
 adjusted_length_growing_period  <- raster("./data/aez/gaez_v4_57_class/adjusted_length_growing_period.tif")
 adjusted_length_growing_period <- projectRaster(adjusted_length_growing_period,aez_33_classes)
 
 
 dixons_farm_categories <- sf::read_sf("./data/dixons-farming-systems/FS/fs_lev_2.shp")
-plot(dixons_farm_categories)
+# plot(dixons_farm_categories)
 
 
 
@@ -433,25 +429,16 @@ rasValue <- convert_aez_classes(rasValue,
 # Zonal Estimates
 
 spatial_fao <- as(fao_level_2, "Spatial")
-spatial_fao = spTransform(spatial_fao,crs(aez_33_classes))
-
-raster_to_merge <- raster::stack(aez_33_classes)
-
-
-
-
-
-
-
+spatial_fao <- spTransform(spatial_fao,crs(aez_33_classes))
 
 result <- categorical_pixel_counts(polygon_feature = spatial_fao,
                          categorical_raster = raster::stack(aez_33_classes),
-                         category_prefix = "level_2_aez_33_classes"
+                         category_prefix = "level_2_aez_33_classes",
                         )
 
 result <- continuous_pixel_stat(polygon_feature =result,
                       continuous_raster = raster::stack(adjusted_length_growing_period),
-                      new_name = "level_2_mean_adjusted_length"
+                      new_name = "level_2_mean_length_growing_season"
                       )
 
 fao_level_2 <- st_as_sf(result)
