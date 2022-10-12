@@ -24,6 +24,8 @@ echo "Cancel your job by entering scancel ${SLURM_JOBID}  \n"
 echo "More details on submitting jobs here https://www.acrc.bris.ac.uk/protected/hpc-docs/job_types/ \n"
 
 module add languages/r/4.1.0
+module add tools/cmake/3.20.0 #Needed for R-package nloptr
+tools/gdal/3.4.0 # Needed for spatial analysis
 
 # d=$(date +%Y-%m-%d)
 
