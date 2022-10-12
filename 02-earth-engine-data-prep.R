@@ -67,7 +67,7 @@ library(optparse)
 # Initialising Parallel ---------------------------------------------------
 
 # n.cores <- parallel::detectCores()-1
-n.cores <- 27
+n.cores <- 7
 my.cluster <- parallel::makeCluster(
   n.cores)
 doParallel::registerDoParallel(cl = my.cluster)
@@ -362,27 +362,27 @@ fao_level_2 <- fao_level_2[types!="GEOMETRYCOLLECTION",]
 
 
 # Elevation 
-elevation_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name = "digital-elevation-zone-2.csv")
+elevation_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name = "digital-elevation-zone-2.csv")
 
 # Land Cover Categories (coverage)
-land_cover_cat <- read_and_tranform_ee_df( basepath = paste0(opt$directory,"earth-engine/"),file_name = "land-cover-categories-level-2.csv",
+land_cover_cat <- read_and_tranform_ee_df( basepath = paste0(opt$directory,"data/earth-engine/"),file_name = "land-cover-categories-level-2.csv",
                                            categorical=T,
                                            band_name="land_cat")
 
 # NDVI 
-ndvi_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="ndvi-zone-2.csv")
+ndvi_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name ="ndvi-zone-2.csv")
 
 # Night Lights 
-night_lights_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="night-time-light-mean-zone-2.csv")
+night_lights_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name ="night-time-light-mean-zone-2.csv")
 
 # Pop density 
-pop_density_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="population-density-zone-2.csv")
+pop_density_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name ="population-density-zone-2.csv")
 
 # Topographic Diversity
-topographic_diversity_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="topographic-diversity-zone-2.csv")
+topographic_diversity_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name ="topographic-diversity-zone-2.csv")
 
 # Hospital Travel Time
-travel_time_health_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="travel-time-to-health-zone-2.csv")
+travel_time_health_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"data/earth-engine/"),file_name ="travel-time-to-health-zone-2.csv")
 
 
 

@@ -5,7 +5,7 @@
 #SBATCH --job-name=farm-size-data-prep
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=27
+#SBATCH --cpus-per-task=7
 #SBATCH --time=00:30:00
 #SBATCH --mem=8G
 
