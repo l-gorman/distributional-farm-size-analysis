@@ -62,6 +62,8 @@ library(foreach)
 library(doParallel)
 
 
+library(optparse)
+
 # Initialising Parallel ---------------------------------------------------
 
 # n.cores <- parallel::detectCores()-1
@@ -76,6 +78,14 @@ doParallel::registerDoParallel(cl = my.cluster)
 #how many workers are available? (optional)
 #foreach::getDoParWorkers()
 
+option_list = list(
+  make_option(c("-d", "--directory"),  type='integer',
+              help="Directory"))
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+# opt <- list()
+# opt$directory <- "./"
 # -------------------------------------------------------------------------------------------------------------
 # Defining Functions -------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
@@ -325,24 +335,24 @@ continuous_pixel_stat <- function(polygon_feature,
 
 # LSMS Data
 
-lsms_data <- readr::read_csv("./data/lsms/farm-size-all-points.csv")
+lsms_data <- readr::read_csv(paste0(opt$directory,"data/lsms/farm-size-all-points.csv"))
 lsms_data$index <- c(1:nrow(lsms_data))
 
 # Point Stats -------------------------------------------------------------
 
 
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/travel-time-lsms.csv","travel_time_point")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/land-cover-lsms.csv","land_cover_point")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/population-density-lsms.csv","population_density_point")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/topographic-diversity-lsms.csv","topographic_diversity_point")
-lsms_data <- read_gee_point_df(lsms_data,"./data/lsms/earth-engine/night-time-light-lsms.csv","night_lights_point")
+lsms_data <- read_gee_point_df(lsms_data,paste0(opt$directory,"data/lsms/earth-engine/travel-time-lsms.csv"),"travel_time_point")
+lsms_data <- read_gee_point_df(lsms_data,paste0(opt$directory,"data/lsms/earth-engine/land-cover-lsms.csv"),"land_cover_point")
+lsms_data <- read_gee_point_df(lsms_data,paste0(opt$directory,"data/lsms/earth-engine/population-density-lsms.csv"),"population_density_point")
+lsms_data <- read_gee_point_df(lsms_data,paste0(opt$directory,"data/lsms/earth-engine/topographic-diversity-lsms.csv"),"topographic_diversity_point")
+lsms_data <- read_gee_point_df(lsms_data,paste0(opt$directory,"data/lsms/earth-engine/night-time-light-lsms.csv"),"night_lights_point")
 lsms_data <- lsms_data[complete.cases(lsms_data),]
 
 # Areal Stats -------------------------------------------------------------
 # Earth Engine Data
 # FAO administrative data
 
-fao_level_2 <- geojson_sf('data/earth-engine/fao-gaul-level-2.geojson')
+fao_level_2 <- geojson_sf(paste0(opt$directory,'data/earth-engine/fao-gaul-level-2.geojson'))
 fao_level_2 <- sf::st_as_sf(x = fao_level_2, wkt = "geometry")
 fao_level_2 <-st_set_crs(fao_level_2,'EPSG:4326')
 types <- vapply(sf::st_geometry(fao_level_2), function(x) {
@@ -352,37 +362,37 @@ fao_level_2 <- fao_level_2[types!="GEOMETRYCOLLECTION",]
 
 
 # Elevation 
-elevation_data <- read_and_tranform_ee_df("digital-elevation-zone-2.csv")
+elevation_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name = "digital-elevation-zone-2.csv")
 
 # Land Cover Categories (coverage)
-land_cover_cat <- read_and_tranform_ee_df( "land-cover-categories-level-2.csv",
+land_cover_cat <- read_and_tranform_ee_df( basepath = paste0(opt$directory,"earth-engine/"),file_name = "land-cover-categories-level-2.csv",
                                            categorical=T,
                                            band_name="land_cat")
 
 # NDVI 
-ndvi_data <- read_and_tranform_ee_df("ndvi-zone-2.csv")
+ndvi_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="ndvi-zone-2.csv")
 
 # Night Lights 
-night_lights_data <- read_and_tranform_ee_df("night-time-light-mean-zone-2.csv")
+night_lights_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="night-time-light-mean-zone-2.csv")
 
 # Pop density 
-pop_density_data <- read_and_tranform_ee_df("population-density-zone-2.csv")
+pop_density_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="population-density-zone-2.csv")
 
 # Topographic Diversity
-topographic_diversity_data <- read_and_tranform_ee_df("topographic-diversity-zone-2.csv")
+topographic_diversity_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="topographic-diversity-zone-2.csv")
 
 # Hospital Travel Time
-travel_time_health_data <- read_and_tranform_ee_df("travel-time-to-health-zone-2.csv")
+travel_time_health_data <- read_and_tranform_ee_df(basepath = paste0(opt$directory,"earth-engine/"),file_name ="travel-time-to-health-zone-2.csv")
 
 
 
 # GAEZ data ---------------------------------------------------------------
 
 # Agro-Eco Zone Data (GAEZ)
-aez_33_classes <- raster("./data/gaez/33_classes.tif")
+aez_33_classes <- raster(paste0(opt$directory,"data/gaez/33_classes.tif"))
 rasterToPoints(aez_33_classes)
 
-xml_33_list <-  xmlParse('./data/aez/LR/aez/aez_v9v2red_5m_ENSEMBLE_rcp2p6_2020s.tif.aux.xml')
+xml_33_list <-  xmlParse(paste0(opt$directory,'data/aez/LR/aez/aez_v9v2red_5m_ENSEMBLE_rcp2p6_2020s.tif.aux.xml'))
 xml_33_list <- xmlToList(xml_33_list)
 xml_33_list <- xml_33_list$PAMRasterBand$GDALRasterAttributeTable
 xml_33_list <- xml_33_list[names(xml_33_list)=="Row"]
@@ -408,11 +418,11 @@ aez_33_class_conversions <- lapply(c(1:length(xml_33_list)), function(index){
 })  %>% dplyr::bind_rows()
 
 
-adjusted_length_growing_period  <- raster("./data/aez/gaez_v4_57_class/adjusted_length_growing_period.tif")
+adjusted_length_growing_period  <- raster(paste0(opt$directory,"data/aez/gaez_v4_57_class/adjusted_length_growing_period.tif"))
 adjusted_length_growing_period <- projectRaster(adjusted_length_growing_period,aez_33_classes)
 
 
-dixons_farm_categories <- sf::read_sf("./data/dixons-farming-systems/FS/fs_lev_2.shp")
+# dixons_farm_categories <- sf::read_sf("./data/dixons-farming-systems/FS/fs_lev_2.shp")
 # plot(dixons_farm_categories)
 
 
@@ -527,7 +537,7 @@ lsms_data <- lsms_data %>% merge(joined_df[columns_to_merge], by="index")
 
 
 
-readr::write_csv(joined_df, "data/prepared-data/lsms-ee-gaez.csv")
+readr::write_csv(joined_df, paste0(opt$directory,"data/prepared-data/lsms-ee-gaez.csv"))
 
 # readr::write_csv(joined_df, "data/prepared-data/rhomis-ee-gaez.csv")
 # readr::write_csv(ind_data, "data/prepared-data/rhomis-indicator-ee-gaez.csv")
@@ -536,10 +546,10 @@ readr::write_csv(joined_df, "data/prepared-data/lsms-ee-gaez.csv")
 
 # readr::write_csv(joined_df, "data/prepared-data/rhomis-ee-gaez.csv")
 
-if (file.exists("data/prepared-data/fao_level_2.geojson")){
-  file.remove("data/prepared-data/fao_level_2.geojson")
+if (file.exists(paste0(opt$directory,"data/prepared-data/fao_level_2.geojson"))){
+  file.remove(paste0(opt$directory,"data/prepared-data/fao_level_2.geojson"))
 }
-st_write(fao_level_2, "data/prepared-data/fao_level_2.geojson")
+st_write(fao_level_2, paste0(opt$directory,"data/prepared-data/fao_level_2.geojson"))
 
 
 

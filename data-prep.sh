@@ -2,7 +2,7 @@
 
 #SBATCH --mail-user=[lg14410@bristol.ac.uk]
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
-#SBATCH --job-name=distributional-analysis
+#SBATCH --job-name=farm-size-data-prep
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=27
@@ -27,7 +27,7 @@ module add languages/r/4.1.0
 
 # d=$(date +%Y-%m-%d)
 
-export OMP_NUM_THREADS=4
+# export OMP_NUM_THREADS=4
 
-Rscript 02-earth-engine-data-prep.R
+Rscript 02-earth-engine-data-prep.R -d /user/work/distributional-farm-size-analysis
 
