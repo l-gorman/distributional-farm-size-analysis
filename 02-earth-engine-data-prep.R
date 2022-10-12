@@ -64,8 +64,8 @@ library(doParallel)
 
 # Initialising Parallel ---------------------------------------------------
 
-n.cores <- parallel::detectCores()-1
-
+# n.cores <- parallel::detectCores()-1
+n.cores <- 27
 my.cluster <- parallel::makeCluster(
   n.cores)
 doParallel::registerDoParallel(cl = my.cluster)
