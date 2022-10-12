@@ -17,23 +17,18 @@ library(sf)
 library(sp)
 library(stars)
 library(geojsonsf)
-library(corrplot)
 library(raster)
 library(leaflet)
 library(mapview)
 
 # Graph Plotting
 library(ggplot2)
-# library(ggridges)
-library(ggExtra)
+library(ggridges)
 library(RColorBrewer)
-library(GGally)
+library(corrplot)
 
-library(moments) # Package for skewness
-library(gamlss) # Gaussian additive models for location, scale, and shape
-library(bamlss) # Bayesian additive models for location, scale, and shape
+
 library(brms) # General package for bayesian models with lme4 syntax and stan backend
-library(lme4) # General package for bayesian multi-level modelling.
 library(FactoMineR) # Package for pca
 library(factoextra) # Extra pca features
 
@@ -56,17 +51,19 @@ fao_level_2 <- tibble::as_tibble(fao_level_2)
 
 land_categories <-  readr::read_csv("./data/prepared-data/land_cover_classes.csv")
 
-farm_size_data <- farm_size_data %>% merge(land_categories, 
-                                            by.x="land_cover", 
+farm_size_data <- farm_size_data %>% merge(land_categories,
+                                            by.x="land_cover_point",
                                             by.y="Value",
                                             all.x=T,
                                             all.y=F)
-farm_size_data <- farm_size_data %>% dplyr::rename()
+farm_size_data <- farm_size_data %>% dplyr::rename(point_land_cover_description=Description)
+farm_size_data <- farm_size_data %>% dplyr::rename(point_land_cover_tag=Tag)
 
 farm_size_data <- farm_size_data[!is.na(farm_size_data$farm_size_ha),]
 farm_size_data <- farm_size_data[!is.na(farm_size_data$AEZ_Classes_33),]
 
 land_cat_columns <- paste0("land_cat_",c(1:17))
+
 farm_size_data[land_cat_columns] <- lapply(farm_size_data[land_cat_columns] , function(column){
   column[is.na(column)] <- 0
   # Dividing the number of pixels by total pixel count for that area

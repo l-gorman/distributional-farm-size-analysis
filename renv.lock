@@ -69,14 +69,6 @@
         "scatterplot3d"
       ]
     },
-    "Formula": {
-      "Package": "Formula",
-      "Version": "1.2-4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "cc8c8c4d61346cde1ca60030ff9c241f",
-      "Requirements": []
-    },
     "GGally": {
       "Package": "GGally",
       "Version": "2.1.2",
@@ -113,16 +105,6 @@
       "Repository": "CRAN",
       "Hash": "af0e1955cb80bb36b7988cc657db261e",
       "Requirements": []
-    },
-    "MBA": {
-      "Package": "MBA",
-      "Version": "0.0-9",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "d04f461e5002616b82560aea581ad7ff",
-      "Requirements": [
-        "BH"
-      ]
     },
     "Matrix": {
       "Package": "Matrix",
@@ -229,24 +211,6 @@
       "Repository": "CRAN",
       "Hash": "c39fbec8a30d23e721980b8afb31984c",
       "Requirements": []
-    },
-    "bamlss": {
-      "Package": "bamlss",
-      "Version": "1.1-8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c2f39da12025837553980f842e1ea4f0",
-      "Requirements": [
-        "Formula",
-        "MBA",
-        "Matrix",
-        "coda",
-        "colorspace",
-        "mgcv",
-        "mvtnorm",
-        "sp",
-        "survival"
-      ]
     },
     "base64enc": {
       "Package": "base64enc",
@@ -880,38 +844,6 @@
         "parallelly"
       ]
     },
-    "gamlss": {
-      "Package": "gamlss",
-      "Version": "5.4-3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c9aab87e62efa7d2ded9fbd4af22e1aa",
-      "Requirements": [
-        "MASS",
-        "gamlss.data",
-        "gamlss.dist",
-        "nlme",
-        "survival"
-      ]
-    },
-    "gamlss.data": {
-      "Package": "gamlss.data",
-      "Version": "6.0-2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5657057e89088a77474f6380bcb2e20d",
-      "Requirements": []
-    },
-    "gamlss.dist": {
-      "Package": "gamlss.dist",
-      "Version": "6.0-5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "6978133d12632438516a2abd95a3f630",
-      "Requirements": [
-        "MASS"
-      ]
-    },
     "generics": {
       "Package": "generics",
       "Version": "0.1.2",
@@ -1513,14 +1445,6 @@
       "Requirements": [
         "Rcpp"
       ]
-    },
-    "moments": {
-      "Package": "moments",
-      "Version": "0.14.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "bb94fd8ee5f7f127eae2bddbff26864d",
-      "Requirements": []
     },
     "munsell": {
       "Package": "munsell",
