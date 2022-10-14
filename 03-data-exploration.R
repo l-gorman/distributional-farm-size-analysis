@@ -47,7 +47,9 @@ fao_level_2 <- geojson_sf('data/prepared-data/fao_level_2.geojson')
 fao_level_2 <- sf::st_as_sf(x = fao_level_2, wkt = "geometry")
 fao_level_2_geo <-st_set_crs(fao_level_2,'EPSG:4326')
 
+
 fao_level_2 <- tibble::as_tibble(fao_level_2)
+
 
 land_categories <-  readr::read_csv("./data/prepared-data/land_cover_classes.csv")
 
@@ -92,6 +94,8 @@ colnames(farm_size_data)[colnames(farm_size_data) == "elevation_mean"] <- "eleva
 colnames(farm_size_data)[colnames(farm_size_data) == "NDVI_mean_mean"] <- "ndvi"
 colnames(farm_size_data)[colnames(farm_size_data) == "constant_mean"] <- "topographic_diversity"
 
+colnames(farm_size_data)[colnames(farm_size_data) == "level_2_mean_length_growing_season"] <- "length_growing_season"
+
 colnames(fao_level_2)[colnames(fao_level_2) == "accessibility_mean"] <-"healthcare_traveltime"
 colnames(fao_level_2)[colnames(fao_level_2) == "b1_mean_mean"] <- "nightlights"
 colnames(fao_level_2)[colnames(fao_level_2) == "population_density_mean_mean"] <- "population_density"
@@ -100,6 +104,9 @@ colnames(fao_level_2)[colnames(fao_level_2) == "elevation_mean"] <- "elevation"
 colnames(fao_level_2)[colnames(fao_level_2) == "NDVI_mean_mean"] <- "ndvi"
 colnames(fao_level_2)[colnames(fao_level_2) == "constant_mean"] <- "topographic_diversity"
 
+colnames(fao_level_2)[colnames(fao_level_2) == "level_2_mean_length_growing_season"] <- "length_growing_season"
+
+
 farm_size_data$geo_id <- paste0(farm_size_data$ADM0_CODE, "_", 
                                 farm_size_data$ADM1_CODE, "_",
                                 farm_size_data$ADM2_CODE)
@@ -107,6 +114,9 @@ farm_size_data$geo_id <- paste0(farm_size_data$ADM0_CODE, "_",
 fao_level_2$geo_id <- paste0(fao_level_2$ADM0_CODE, "_", 
                              fao_level_2$ADM1_CODE, "_",
                              fao_level_2$ADM2_CODE)
+
+
+
 
 
 # Outlier Detection -------------------------------------------------------
@@ -132,7 +142,7 @@ x <- c("healthcare_traveltime",
        "elevation",
        "ndvi",
        "topographic_diversity",
-       "adjusted_length_growing_period",
+       "length_growing_season",
        
        
        
@@ -141,7 +151,7 @@ x <- c("healthcare_traveltime",
        new_land_cat_columns
 )
 
-aez_33 <- grep("AEZ_Classes_33_", colnames(farm_size_data), value=T)
+aez_33 <- grep("level_2_aez_33_classes_", colnames(farm_size_data), value=T)
 
 
 
@@ -151,6 +161,9 @@ y <-c("farm_size_ha")
 
 # Looking at subnational indicators vas land cultivated
 cor(farm_size_data[c(x,aez_33,y)])
+
+
+farm_size_data[aez_33]
 
 corr_matrix <- round(cor(farm_size_data[c(x,aez_33,y)]),2) %>% tibble::as_tibble()
 corr_matrix$var <- colnames(corr_matrix)
@@ -162,9 +175,9 @@ colnames(corr_matrix) <- c("var1", "var2", "value")
 land_cult_corr <- corr_matrix[corr_matrix$var1=="farm_size_ha", ]
 land_cult_corr <- land_cult_corr[land_cult_corr$var2!="farm_size_ha",]
 
-land_cult_corr$var2 <- gsub("AEZ_Classes_33_", "",land_cult_corr$var2)
+land_cult_corr$var2 <- gsub("level_2_aez_33_classes_", "",land_cult_corr$var2)
 
-land_cult_corr$var2 <- factor(land_cult_corr$var2, levels=c(x,gsub("AEZ_Classes_33_", "",aez_33)), ordered = T)
+land_cult_corr$var2 <- factor(land_cult_corr$var2, levels=c(x,gsub("level_2_aez_33_classes_", "",aez_33)), ordered = T)
 land_cult_corr$factor_level <- as.numeric(land_cult_corr$var2)
 
 socio_economic <- c("healthcare_traveltime",
@@ -174,7 +187,7 @@ socio_economic <- c("healthcare_traveltime",
 environmental <- c("elevation",
                    "ndvi",
                    "topographic_diversity",
-                   "adjusted_length_growing_period")
+                   "length_growing_season")
 
 
 
@@ -184,7 +197,7 @@ land_cult_corr$var_group <- NA
 land_cult_corr$var_group[land_cult_corr$var2 %in% socio_economic] <- "Socio-Economic"
 land_cult_corr$var_group[land_cult_corr$var2 %in% environmental] <- "Environmental"
 land_cult_corr$var_group[land_cult_corr$var2 %in% land_cat] <- "Land-Cover-Class"
-land_cult_corr$var_group[land_cult_corr$var2 %in% gsub("AEZ_Classes_33_", "",aez_33)] <- "Agro-Eco-Zone"
+land_cult_corr$var_group[land_cult_corr$var2 %in% gsub("level_2_aez_33_classes_", "",aez_33)] <- "Agro-Eco-Zone"
 
 land_cult_corr$var_group <- factor(land_cult_corr$var_group, 
                                    levels=c("Agro-Eco-Zone",
@@ -233,10 +246,9 @@ ggplot(data = land_cult_corr, aes(y=var2, x=value)) +
 
 land_cult_corr <- land_cult_corr[order(sqrt(land_cult_corr$value^2),decreasing = T),]
 
-magni
+
 # Initial Modelling -------------------------------------------------------
 
-
-
+write_csv(farm_size_data,"./data/prepared-data/final-modelling-dataset.csv")
 
 

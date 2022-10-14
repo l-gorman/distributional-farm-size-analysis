@@ -199,6 +199,46 @@ convert_aez_classes <- function(aez_df,
   return(result)
 }
 
+
+convert_aez_column_name <- function(aez_df,
+                                aez_colname_pattern, 
+                                aez_conversion_tbl){
+  
+  # aez_df <- fao_level_2
+  # aez_colname_pattern <- "level_2_aez_33_classes_"
+  # aez_conversion_tbl <- aez_33_class_conversions
+  
+  aez_conversion_tbl$name <- aez_conversion_tbl$name %>% 
+    tolower() %>% 
+    gsub("/", " or ", .) %>% 
+    gsub(",", "", .) %>% 
+    gsub(";", "", .) %>% 
+    gsub(" ", "_", .) %>% 
+    gsub("-", "_", .) 
+  
+  
+  columns_to_convert <- grep(aez_colname_pattern, colnames(aez_df@data), value=T)
+  column_indices <- grep(aez_colname_pattern, colnames(aez_df@data))
+  new_columns <- c()
+  for (column in columns_to_convert){
+    original_column <- column
+    original_column_suffix <- gsub(aez_colname_pattern, "", original_column)
+    if (!is.na(as.numeric(original_column_suffix))){
+      new_column_suffix <- aez_conversion_tbl$name[aez_conversion_tbl$band==as.numeric(original_column_suffix)]
+      new_column <- paste0(aez_colname_pattern,new_column_suffix)
+      new_columns <- c(new_columns,new_column)
+    }
+    else{
+      new_columns <- c(new_columns,column)
+    }
+    
+  }
+  
+  colnames(aez_df@data)[column_indices] <- new_columns
+  
+  return(aez_df)
+}
+
 read_gee_point_df <- function(lsms_df ,path, var_name){
   gee_df <- readr::read_csv(path)
   lsms_df <- lsms_df %>% 
@@ -442,12 +482,17 @@ spatial_fao <- spTransform(spatial_fao,crs(aez_33_classes))
 
 result <- categorical_pixel_counts(polygon_feature = spatial_fao,
                          categorical_raster = raster::stack(aez_33_classes),
-                         category_prefix = "level_2_aez_33_classes",10
+                         category_prefix = "level_2_aez_33_classes"
                         )
+
+result <-convert_aez_column_name(aez_df = result,
+                        aez_colname_pattern = "level_2_aez_33_classes_",
+                        aez_conversion_tbl = aez_33_class_conversions)
+
 
 result <- continuous_pixel_stat(polygon_feature =result,
                       continuous_raster = raster::stack(adjusted_length_growing_period),
-                      new_name = "level_2_mean_length_growing_season",10
+                      new_name = "level_2_mean_length_growing_season"
                       )
 
 fao_level_2 <- st_as_sf(result)
