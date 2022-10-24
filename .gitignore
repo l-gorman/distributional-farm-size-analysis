@@ -3,6 +3,9 @@
 .Rproj.user/
 data/
 
+.Rhistory
+Rplot.png
+
 copy-to-bc4.sh
 copy-from-bc4.sh
 
