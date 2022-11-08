@@ -35,8 +35,11 @@ library(factoextra) # Extra pca features
 
 
 household_data_type <- "lsms"
-household_data_path
+household_data_path <- "./data/prepared-data/lsms-ee-gaez.csv"
 
+
+household_data_type <- "lsms"
+household_data_path <- "./data/prepared-data/lsms-ee-gaez.csv"
 
 # Reading in Data ---------------------------------------------------------
 
